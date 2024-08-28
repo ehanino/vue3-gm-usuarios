@@ -22,28 +22,41 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+	import { ref, watchEffect, watch } from 'vue'
     import { useRouter } from 'vue-router';
 	import axios from 'axios';
-// 	import { useAuthStore, useRefreshStore  } from '../store/authStore'
-// 	import { useUsuarioStore  } from '@/store/usuarioStore'
-// // 
-// 	const authStore = useAuthStore();
-// 	const refreshStore = useRefreshStore();
-// 	const usuarioStore = useUsuarioStore();
+	import { useAuthStore } from '../stores/auth'
+	import { useUserStore } from '../stores/userStore'
+	import { getUserInfoFromToken } from '../utils/jwtDecode'
+
+	const authStore = useAuthStore()
+	const userStore = useUserStore()
+
 	const router = useRouter();
 
     const username = ref("eherreraa")
     const password = ref("Languis1902")
+	// const userId = ref(null)
 
 	const handleBlur = () =>{
 		alert("gegege")
 	}
 
+	watchEffect(() => {
+		if (authStore.accessToken) {
+			userStore.setUserInfo(authStore.accessToken)
+		} else {
+			// userStore.clearUserInfo()
+		}
+	})
+
+	watch(() => userStore.$state, (newState) => {
+		console.log('User store state changed:', newState)
+	}, { deep: true })
+
 	const submitForm = async () => {
-		// try {
-				console.log(username.value + "@muniventanilla.gob.pe")
-				const response = await axios.post('http://192.168.12.241:8000/user/api/login/', {
+		// try {				
+				const response = await axios.post('http://192.168.12.241:8000//api/v1/login/', {
 					email: username.value + "@muniventanilla.gob.pe",
 					password: password.value
 				});
@@ -51,24 +64,10 @@
 				if (response.status){
 					const accessToken = response.data.access;
 					const refreshToken = response.data.refresh;
-					// const userId = response.data.user_id;
+					const userId = getUserInfoFromToken(accessToken);
 					const userFullName = response.data.full_name;
 					const userEmail = response.data.email;
-					console.log(accessToken)
-					console.log(refreshToken)
-					// console.log(userId)
-					console.log(userFullName)
-					console.log(userEmail)
-					// Guardar accessToken y refreshToken en el almacenamiento local o en el estado de la aplicación
-					// authStore.setAccessToken(accessToken);
-					// refreshStore.setRefreshToken(refreshToken);
-					
-					// Guardar los datos del usuario en el store de usuario
-					// usuarioStore.setUsuario({
-					// 	id: userId,
-					// 	fullName: userFullName,
-					// 	email: userEmail
-					// });
+					userStore.setUserInfo(accessToken, refreshToken, userId, userEmail, userFullName);
 
 					router.push({ name: 'Dashboard' });
 
