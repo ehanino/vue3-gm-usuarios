@@ -117,5 +117,8 @@
       grid-row: auto;
       height: 150px;
     }
+    .dashboard-container{
+      width: 100%;
+    }
   }
   </style>
