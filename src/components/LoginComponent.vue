@@ -56,7 +56,7 @@
 
 	const submitForm = async () => {
 		// try {				
-				const response = await axios.post('http://192.168.12.241:8000//api/v1/login/', {
+				const response = await axios.post('http://192.168.12.241:8000/api/v1/login/', {
 					email: username.value + "@muniventanilla.gob.pe",
 					password: password.value
 				});
